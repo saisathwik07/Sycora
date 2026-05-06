@@ -39,7 +39,12 @@ const apiLimiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,
-  message: { message: 'Too many auth requests from this IP, please try again after 15 minutes' }
+  message: { message: 'Too many auth requests from this IP, please try again after 15 minutes' },
+  // Browser OAuth redirects must never stall behind rate-limit internals on Railway/proxies.
+  skip: (req) => {
+    const url = req.originalUrl || req.url || '';
+    return req.method === 'GET' && url.includes('/api/auth/google');
+  },
 });
 
 app.use('/api/auth', authLimiter);

@@ -23,24 +23,65 @@ function getRedirectUri() {
   }
   const apiBase = (process.env.API_PUBLIC_URL || '').trim().replace(/\/$/, '');
   const fallbackPort = process.env.PORT || 8080;
-  const base =
-    apiBase || `http://localhost:${fallbackPort}`;
+  const base = apiBase || `http://localhost:${fallbackPort}`;
   return `${base.replace(/\/$/, '')}/api/auth/google/callback`;
 }
 
 function redirectWithError(res, code) {
   const frontend = getFrontendUrl();
-  return res.redirect(`${frontend}/login?oauth_error=${encodeURIComponent(code)}`);
+  return res.redirect(302, `${frontend}/login?oauth_error=${encodeURIComponent(code)}`);
+}
+
+function maskId(id) {
+  if (!id || typeof id !== 'string') return '(missing)';
+  return `${id.slice(0, 8)}…${id.slice(-4)}`;
 }
 
 /**
  * Starts Google OAuth — redirects browser to Google consent.
+ * Fully synchronous: no awaited promises (avoids “hang” from unresolved async).
  */
 exports.googleRedirect = (req, res) => {
+  const rid = `${Date.now().toString(36)}-${crypto.randomBytes(3).toString('hex')}`;
+  console.log('[googleOAuth] googleRedirect:start', {
+    rid,
+    path: req.path,
+    originalUrl: req.originalUrl,
+    xfProto: req.get('x-forwarded-proto'),
+    xfHost: req.get('x-forwarded-host'),
+  });
+
   try {
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+
+    if (!clientId || !clientSecret) {
+      console.error('[googleOAuth] googleRedirect:missing_credentials', {
+        rid,
+        hasClientId: Boolean(clientId),
+        hasSecret: Boolean(clientSecret),
+      });
       return res.status(503).json({
         message: 'Google OAuth is not configured',
+        success: false,
+      });
+    }
+
+    const redirectUri = getRedirectUri();
+    const runningOnRailway = Boolean(
+      process.env.RAILWAY_ENVIRONMENT ||
+        process.env.RAILWAY_PROJECT_ID ||
+        process.env.RAILWAY_SERVICE_NAME,
+    );
+    if (runningOnRailway && /localhost|127\.0\.0\.1/i.test(redirectUri)) {
+      console.error(
+        '[googleOAuth] googleRedirect:bad_redirect_uri',
+        'Set GOOGLE_REDIRECT_URI or API_PUBLIC_URL on Railway (got localhost fallback).',
+        { rid, redirectUri }
+      );
+      return res.status(503).json({
+        message:
+          'OAuth redirect URI is misconfigured (using localhost on Railway). Set GOOGLE_REDIRECT_URI or API_PUBLIC_URL.',
         success: false,
       });
     }
@@ -50,6 +91,14 @@ exports.googleRedirect = (req, res) => {
       process.env.COOKIE_SECURE === 'true' ||
       process.env.NODE_ENV === 'production' ||
       process.env.RAILWAY_ENVIRONMENT === 'production';
+
+    console.log('[googleOAuth] googleRedirect:pre_cookie', {
+      rid,
+      redirectUri,
+      clientId: maskId(clientId),
+      useSecureCookies,
+    });
+
     res.cookie('google_oauth_state', state, {
       httpOnly: true,
       maxAge: 10 * 60 * 1000,
@@ -58,9 +107,8 @@ exports.googleRedirect = (req, res) => {
       path: '/',
     });
 
-    const redirectUri = getRedirectUri();
     const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_id: clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'openid email profile',
@@ -68,13 +116,27 @@ exports.googleRedirect = (req, res) => {
       prompt: 'select_account',
     });
 
-    return res.redirect(`${GOOGLE_AUTH}?${params.toString()}`);
-  } catch (err) {
-    console.error('Google OAuth redirect error:', err);
-    return res.status(500).json({
-      message: 'Failed to start Google sign-in',
-      success: false,
+    const authUrl = `${GOOGLE_AUTH}?${params.toString()}`;
+    console.log('[googleOAuth] googleRedirect:sending_redirect', {
+      rid,
+      authUrlLen: authUrl.length,
+      googleAuthHost: GOOGLE_AUTH,
     });
+
+    return res.redirect(302, authUrl);
+  } catch (err) {
+    console.error('[googleOAuth] googleRedirect:error', {
+      rid,
+      message: err?.message,
+      stack: err?.stack,
+    });
+    if (!res.headersSent) {
+      return res.status(500).json({
+        message: 'Failed to start Google sign-in',
+        success: false,
+      });
+    }
+    return undefined;
   }
 };
 
@@ -83,7 +145,10 @@ exports.googleRedirect = (req, res) => {
  */
 exports.googleCallback = async (req, res) => {
   try {
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+
+    if (!clientId || !clientSecret) {
       return redirectWithError(res, 'not_configured');
     }
 
@@ -108,8 +173,8 @@ exports.googleCallback = async (req, res) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        client_id: clientId,
+        client_secret: clientSecret,
         redirect_uri: redirectUri,
         grant_type: 'authorization_code',
       }),
@@ -194,9 +259,12 @@ exports.googleCallback = async (req, res) => {
 
     const metaEncoded = encodeURIComponent(JSON.stringify(meta));
     const frag = `token=${encodeURIComponent(token)}&meta=${metaEncoded}`;
-    return res.redirect(`${frontend}/auth/google/callback#${frag}`);
+    return res.redirect(302, `${frontend}/auth/google/callback#${frag}`);
   } catch (err) {
-    console.error('Google OAuth callback error:', err);
-    return redirectWithError(res, 'server_error');
+    console.error('Google OAuth callback error:', err?.stack || err?.message || err);
+    if (!res.headersSent) {
+      return redirectWithError(res, 'server_error');
+    }
+    return undefined;
   }
 };
