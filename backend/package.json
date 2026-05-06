@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
     "dev:memory": "cross-env USE_IN_MEMORY_MONGO=true nodemon index.js",
-    "start": "node --watch index.js",
+    "start": "node index.js",
     "start:memory": "cross-env USE_IN_MEMORY_MONGO=true node index.js"
   },
   "keywords": [],

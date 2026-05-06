@@ -12,6 +12,13 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Railway / reverse proxies: required so req.ip, secure cookies, and express-rate-limit work.
+// Set TRUST_PROXY=false locally only if you hit odd req.ip behavior.
+if (process.env.TRUST_PROXY !== 'false') {
+  const hops = parseInt(process.env.TRUST_PROXY ?? '1', 10);
+  app.set('trust proxy', Number.isFinite(hops) && hops >= 0 ? hops : 1);
+}
+
 app.use(helmet());
 app.use(cookieParser());
 app.use(cors({
@@ -53,14 +60,15 @@ app.get('', (req, res) => {
     res.send('API is running... <br><a href="/api-docs">View API Documentation</a>');
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 8080;
 
 async function start() {
   await connectDB();
 
-  const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+  const host = process.env.LISTEN_HOST || '0.0.0.0';
+  const server = app.listen(PORT, host, () => {
+    console.log(`Server listening on ${host}:${PORT}`);
+    console.log(`API docs: ${process.env.API_PUBLIC_URL || `http://localhost:${PORT}`}/api-docs`);
   });
 
   server.on('error', (err) => {

@@ -7,55 +7,75 @@ const GOOGLE_AUTH = 'https://accounts.google.com/o/oauth2/v2/auth';
 const GOOGLE_TOKEN = 'https://oauth2.googleapis.com/token';
 const GOOGLE_USERINFO = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
+/** SPA origin (Vercel). No trailing slash. */
+function getFrontendUrl() {
+  return (process.env.FRONTEND_URL || 'http://localhost:4200').replace(/\/$/, '');
+}
+
+/**
+ * Must exactly match an entry in Google Cloud Console → Authorized redirect URIs.
+ * Prefer GOOGLE_REDIRECT_URI in production. Otherwise API_PUBLIC_URL + /api/auth/google/callback.
+ */
 function getRedirectUri() {
-  if (process.env.GOOGLE_REDIRECT_URI) {
-    return process.env.GOOGLE_REDIRECT_URI;
+  const explicit = process.env.GOOGLE_REDIRECT_URI?.trim();
+  if (explicit) {
+    return explicit.replace(/\/$/, '');
   }
+  const apiBase = (process.env.API_PUBLIC_URL || '').trim().replace(/\/$/, '');
+  const fallbackPort = process.env.PORT || 8080;
   const base =
-    process.env.API_PUBLIC_URL ||
-    `http://localhost:${process.env.PORT || 3000}`;
+    apiBase || `http://localhost:${fallbackPort}`;
   return `${base.replace(/\/$/, '')}/api/auth/google/callback`;
 }
 
 function redirectWithError(res, code) {
-  const frontend = (process.env.FRONTEND_URL || 'http://localhost:4200').replace(
-    /\/$/,
-    ''
-  );
-  res.redirect(`${frontend}/login?oauth_error=${encodeURIComponent(code)}`);
+  const frontend = getFrontendUrl();
+  return res.redirect(`${frontend}/login?oauth_error=${encodeURIComponent(code)}`);
 }
 
 /**
  * Starts Google OAuth — redirects browser to Google consent.
  */
 exports.googleRedirect = (req, res) => {
-  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-    return res.status(503).json({
-      message: 'Google OAuth is not configured',
+  try {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+      return res.status(503).json({
+        message: 'Google OAuth is not configured',
+        success: false,
+      });
+    }
+
+    const state = crypto.randomBytes(24).toString('hex');
+    const useSecureCookies =
+      process.env.COOKIE_SECURE === 'true' ||
+      process.env.NODE_ENV === 'production' ||
+      process.env.RAILWAY_ENVIRONMENT === 'production';
+    res.cookie('google_oauth_state', state, {
+      httpOnly: true,
+      maxAge: 10 * 60 * 1000,
+      sameSite: 'lax',
+      secure: process.env.COOKIE_SECURE === 'false' ? false : useSecureCookies,
+      path: '/',
+    });
+
+    const redirectUri = getRedirectUri();
+    const params = new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: 'openid email profile',
+      state,
+      prompt: 'select_account',
+    });
+
+    return res.redirect(`${GOOGLE_AUTH}?${params.toString()}`);
+  } catch (err) {
+    console.error('Google OAuth redirect error:', err);
+    return res.status(500).json({
+      message: 'Failed to start Google sign-in',
       success: false,
     });
   }
-
-  const state = crypto.randomBytes(24).toString('hex');
-  res.cookie('google_oauth_state', state, {
-    httpOnly: true,
-    maxAge: 10 * 60 * 1000,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-  });
-
-  const redirectUri = getRedirectUri();
-  const params = new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID,
-    redirect_uri: redirectUri,
-    response_type: 'code',
-    scope: 'openid email profile',
-    state,
-    prompt: 'select_account',
-  });
-
-  res.redirect(`${GOOGLE_AUTH}?${params.toString()}`);
 };
 
 /**
@@ -155,10 +175,7 @@ exports.googleCallback = async (req, res) => {
     }
 
     const token = generateToken(hydratedUser);
-    const frontend = (process.env.FRONTEND_URL || 'http://localhost:4200').replace(
-      /\/$/,
-      ''
-    );
+    const frontend = getFrontendUrl();
 
     const meta = {
       expiresIn: 3600,
@@ -177,9 +194,9 @@ exports.googleCallback = async (req, res) => {
 
     const metaEncoded = encodeURIComponent(JSON.stringify(meta));
     const frag = `token=${encodeURIComponent(token)}&meta=${metaEncoded}`;
-    res.redirect(`${frontend}/auth/google/callback#${frag}`);
+    return res.redirect(`${frontend}/auth/google/callback#${frag}`);
   } catch (err) {
     console.error('Google OAuth callback error:', err);
-    redirectWithError(res, 'server_error');
+    return redirectWithError(res, 'server_error');
   }
 };
