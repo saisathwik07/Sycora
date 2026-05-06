@@ -1,0 +1,178 @@
+<div class="mx-auto max-w-4xl animate-fade-in pb-10">
+    <a routerLink="/tasks" class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-syn-muted transition hover:text-syn-ink dark:hover:text-white">
+        <i class="fas fa-arrow-left text-xs"></i>
+        Tasks
+    </a>
+
+    @if (loading()) {
+        <div class="rounded-2xl tf-glass dark:bg-zinc-900/50">
+            <app-loading-state message="Loading task…" />
+        </div>
+    } @else if (error()) {
+        <div class="rounded-2xl border border-rose-500/30 bg-rose-50 p-6 text-rose-900 dark:bg-rose-950/25 dark:text-rose-100">
+            <p class="font-medium">Something went wrong</p>
+            <p class="mt-1 text-sm opacity-90">{{ error() }}</p>
+            <button type="button" class="mt-4 text-sm font-medium text-accent-600 hover:text-accent-500 dark:text-accent-400 dark:hover:text-accent-300" (click)="goBack()">Go back</button>
+        </div>
+    } @else {
+        @let currentTask = task();
+        @if (currentTask) {
+            <div class="overflow-hidden rounded-2xl tf-glass dark:bg-zinc-900/40">
+                <div
+                    class="border-b border-syn-border px-6 py-6 backdrop-blur-xl dark:border-white/[0.06]"
+                    [ngClass]="currentTask.completed
+                        ? 'bg-gradient-to-r from-emerald-50 via-slate-50 to-white dark:from-emerald-900/40 dark:via-zinc-900/60 dark:to-zinc-950'
+                        : 'bg-gradient-to-r from-violet-50 via-white to-indigo-50 dark:from-accent-900/35 dark:via-zinc-900/70 dark:to-indigo-950/50'"
+                >
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="min-w-0">
+                            <h1 class="text-2xl font-semibold tracking-tight text-syn-ink sm:text-3xl dark:text-white" [ngClass]="{'line-through opacity-70': currentTask.completed}">
+                                {{ currentTask.title }}
+                            </h1>
+                            <div class="mt-3 flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-syn-muted ring-1 ring-syn-border dark:bg-black/25 dark:text-zinc-200 dark:ring-white/10">
+                                    <i class="far fa-calendar opacity-70"></i>
+                                    {{ currentTask.deadline | date:'mediumDate' }}
+                                </span>
+                                <span
+                                    class="tf-badge"
+                                    [ngClass]="{
+                                        'bg-rose-100 text-rose-800 ring-1 ring-rose-200 dark:bg-rose-500/90 dark:text-white dark:ring-0': currentTask.priority === 'High',
+                                        'bg-amber-100 text-amber-900 ring-1 ring-amber-200 dark:bg-amber-400/90 dark:text-zinc-950 dark:ring-0': currentTask.priority === 'Medium',
+                                        'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-600/85 dark:text-white dark:ring-0': currentTask.priority === 'Low'
+                                    }"
+                                >{{ currentTask.priority }}</span>
+                                @if (!currentTask.completed) {
+                                    @let alert = (currentTask.deadline | deadlineAlert);
+                                    @if (alert) {
+                                        <span [ngClass]="alert.colorClass" class="rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide">{{ alert.text }}</span>
+                                    }
+                                }
+                                <span class="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-syn-muted ring-1 ring-syn-border dark:bg-black/20 dark:text-zinc-300 dark:ring-white/10">
+                                    <i class="far fa-user opacity-70"></i>
+                                    {{ getUserEmail(currentTask.user) }}
+                                </span>
+                            </div>
+                        </div>
+                        <span
+                            class="inline-flex shrink-0 items-center gap-2 self-start rounded-full px-4 py-1.5 text-xs font-semibold ring-1 ring-syn-border dark:ring-white/15"
+                            [ngClass]="currentTask.completed ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300' : 'bg-violet-100 text-violet-800 dark:bg-accent-500/20 dark:text-accent-200'"
+                        >
+                            <i class="fas" [ngClass]="currentTask.completed ? 'fa-circle-check' : 'fa-circle-notch'"></i>
+                            {{ currentTask.completed ? 'Completed' : 'In progress' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-8 p-6">
+                    <section>
+                        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wider text-syn-muted">Description</h2>
+                        <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-4 text-sm leading-relaxed text-syn-ink dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-zinc-300">
+                            {{ currentTask.description || 'No description provided.' }}
+                        </div>
+                    </section>
+
+                    <section class="rounded-xl border border-syn-border bg-slate-50/50 p-5 dark:border-white/[0.06] dark:bg-white/[0.02]">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h2 class="text-sm font-semibold text-syn-ink dark:text-white">Subtasks</h2>
+                            <span class="rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-semibold text-violet-800 ring-1 ring-violet-200 dark:bg-accent-500/15 dark:text-accent-300 dark:ring-accent-500/25">
+                                {{ getCompletedSubtasksCount() }}/{{ getTotalSubtasksCount() }}
+                            </span>
+                        </div>
+                        @if (currentTask.subtasks && currentTask.subtasks.length > 0) {
+                            <div class="space-y-2">
+                                @for (subtask of currentTask.subtasks; track subtask._id || $index) {
+                                    <button
+                                        type="button"
+                                        (click)="toggleSubtask(subtask)"
+                                        class="flex w-full items-center gap-3 rounded-lg border border-transparent px-3 py-3 text-left transition hover:border-syn-border hover:bg-white dark:hover:border-white/10 dark:hover:bg-white/[0.04]"
+                                        [ngClass]="{'opacity-60': subtask.completed}"
+                                    >
+                                        <span
+                                            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors"
+                                            [ngClass]="subtask.completed ? 'border-accent-500 bg-accent-600 text-white' : 'border-slate-300 bg-transparent dark:border-zinc-600'"
+                                        >
+                                            @if (subtask.completed) {
+                                                <i class="fas fa-check text-[10px]"></i>
+                                            }
+                                        </span>
+                                        <span class="text-sm font-medium" [ngClass]="subtask.completed ? 'text-syn-muted line-through' : 'text-syn-ink dark:text-zinc-200'">{{ subtask.title }}</span>
+                                    </button>
+                                }
+                            </div>
+                        } @else {
+                            <p class="rounded-lg border border-dashed border-syn-border py-8 text-center text-sm text-syn-muted dark:border-white/10">No subtasks for this task.</p>
+                        }
+                    </section>
+
+                    <div class="flex flex-wrap gap-3">
+                        @if (!currentTask.completed) {
+                            <button
+                                type="button"
+                                (click)="completeTask()"
+                                [disabled]="loading()"
+                                class="tf-btn-primary bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40"
+                            >
+                                <i class="fas text-xs" [ngClass]="loading() ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+                                {{ loading() ? 'Updating…' : 'Mark complete' }}
+                            </button>
+                        }
+                        <button
+                            type="button"
+                            (click)="editTask()"
+                            [disabled]="loading() || deleting()"
+                            class="tf-btn-ghost disabled:opacity-40"
+                        >
+                            <i class="fas fa-pen text-xs"></i>
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            (click)="deleteTask()"
+                            [disabled]="deleting() || loading()"
+                            class="inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-rose-50 px-4 py-2.5 text-sm font-medium text-rose-800 transition hover:bg-rose-100 disabled:opacity-40 dark:border-rose-500/35 dark:bg-rose-950/30 dark:text-rose-200 dark:hover:bg-rose-950/50"
+                        >
+                            <i class="fas text-xs" [ngClass]="deleting() ? 'fa-spinner fa-spin' : 'fa-trash'"></i>
+                            {{ deleting() ? 'Deleting…' : 'Delete' }}
+                        </button>
+                    </div>
+
+                    <section class="border-t border-syn-border pt-8 dark:border-white/[0.06]">
+                        <h3 class="mb-4 flex items-center gap-2 text-sm font-semibold text-syn-ink dark:text-white">
+                            <i class="fas fa-clock-rotate-left text-accent-600 dark:text-accent-400"></i>
+                            Activity
+                        </h3>
+                        @if (activities().length > 0) {
+                            <div class="relative space-y-4 pl-4 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-px before:bg-syn-border dark:before:bg-white/10">
+                                @for (activity of activities(); track activity._id) {
+                                    <div class="relative pl-6">
+                                        <div
+                                            class="absolute left-0 top-1.5 flex h-[14px] w-[14px] items-center justify-center rounded-full ring-2 ring-syn-card dark:ring-zinc-950"
+                                            [ngClass]="{
+                                                'bg-accent-500': activity.action === 'created',
+                                                'bg-emerald-500': activity.action === 'status_changed' && activity.details.includes('completed'),
+                                                'bg-amber-500': activity.action === 'status_changed' && !activity.details.includes('completed'),
+                                                'bg-indigo-500': activity.action === 'subtask_toggled',
+                                                'bg-zinc-500': activity.action === 'updated'
+                                            }"
+                                        ></div>
+                                        <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+                                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-syn-muted">{{ activity.action | replace:'_':' ' }}</span>
+                                                <span class="text-[10px] text-syn-muted">{{ activity.createdAt | date:'MMM d, h:mm a' }}</span>
+                                            </div>
+                                            <p class="mt-1 text-sm text-syn-ink dark:text-zinc-200">{{ activity.details }}</p>
+                                            <p class="mt-2 text-[11px] text-syn-muted">{{ getUserEmail(activity.user) }}</p>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <p class="rounded-xl border border-dashed border-syn-border py-10 text-center text-sm text-syn-muted dark:border-white/10">No activity logged yet.</p>
+                        }
+                    </section>
+                </div>
+            </div>
+        }
+    }
+</div>

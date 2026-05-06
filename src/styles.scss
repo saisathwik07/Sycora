@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Syncora theme tokens — toggled via html.dark (ThemeService) */
+:root {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --card-bg: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --accent-color: #7c3aed;
+  --accent-hover: #ede9fe;
+
+  --syn-bg-app: #f8fafc;
+  --syn-bg-sidebar: #ffffff;
+  --syn-bg-header: rgba(255, 255, 255, 0.94);
+  --syn-bg-footer: #f8fafc;
+  --syn-card: #ffffff;
+  --syn-elevated: #f1f5f9;
+  --syn-text: #0f172a;
+  --syn-text-muted: #475569;
+  --syn-border: #e2e8f0;
+  --syn-accent: #7c3aed;
+  --syn-accent-hover: #ede9fe;
+}
+
+.dark {
+  --bg-primary: #0b0b12;
+  --bg-secondary: #12121c;
+  --card-bg: #161622;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(226, 232, 240, 0.12);
+  --accent-color: #8b5cf6;
+  --accent-hover: rgba(139, 92, 246, 0.18);
+
+  --syn-bg-app: #0b0b12;
+  --syn-bg-sidebar: #12121c;
+  --syn-bg-header: rgba(18, 18, 28, 0.94);
+  --syn-bg-footer: #0b0b12;
+  --syn-card: #161622;
+  --syn-elevated: #1e1e2d;
+  --syn-text: #ffffff;
+  --syn-text-muted: #94a3b8;
+  --syn-border: rgba(226, 232, 240, 0.12);
+  --syn-accent: #8b5cf6;
+  --syn-accent-hover: rgba(139, 92, 246, 0.18);
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    background-color: var(--syn-bg-app);
+    color: var(--syn-text);
+  }
+
+  ::selection {
+    background-color: rgba(124, 58, 237, 0.22);
+    color: inherit;
+  }
+
+  .dark ::selection {
+    background-color: rgba(139, 92, 246, 0.35);
+    color: inherit;
+  }
+}
+
+@layer components {
+  .tf-glass {
+    @apply backdrop-blur-xl;
+    background-color: var(--syn-card);
+    border: 1px solid var(--syn-border);
+    box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.06);
+  }
+
+  .dark .tf-glass {
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+  }
+
+  .tf-glass-subtle {
+    background-color: var(--syn-elevated);
+    border: 1px solid var(--syn-border);
+    backdrop-filter: blur(12px);
+  }
+
+  .tf-input {
+    @apply w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-[box-shadow,border-color];
+    border: 1px solid var(--syn-border);
+    background-color: var(--syn-card);
+    color: var(--syn-text);
+  }
+
+  .tf-input::placeholder {
+    color: var(--syn-text-muted);
+    opacity: 0.9;
+  }
+
+  .tf-input:focus {
+    border-color: rgba(124, 58, 237, 0.45);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+  }
+
+  .dark .tf-input:focus {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+  }
+
+  .tf-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    background-color: var(--syn-accent);
+    color: #ffffff;
+  }
+
+  .tf-btn-primary:hover {
+    filter: brightness(1.07);
+  }
+
+  .tf-btn-primary:focus-visible {
+    outline-color: var(--syn-accent);
+  }
+
+  .tf-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors;
+    border: 1px solid var(--syn-border);
+    color: var(--syn-text);
+    background-color: transparent;
+  }
+
+  .tf-btn-ghost:hover {
+    background-color: var(--syn-accent-hover);
+    border-color: rgba(124, 58, 237, 0.28);
+  }
+
+  .dark .tf-btn-ghost:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .tf-badge {
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}

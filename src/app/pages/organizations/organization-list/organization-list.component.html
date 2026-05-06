@@ -1,0 +1,67 @@
+<div class="animate-fade-in space-y-6">
+    <div>
+        <h1 class="text-2xl font-semibold tracking-tight text-syn-ink dark:text-white">Organizations</h1>
+        <p class="mt-1 text-sm text-syn-muted">Switch context across workspaces.</p>
+    </div>
+
+    @if (loading()) {
+        <app-loading-state message="Loading organizations..." />
+    } @else if (error()) {
+        <div class="rounded-2xl border border-red-500/30 bg-red-50 p-6 text-red-900 dark:bg-red-950/30 dark:text-red-100">
+            <p class="font-medium">Unable to load</p>
+            <p class="mt-1 text-sm">{{ error() }}</p>
+            <button type="button" class="mt-4 text-sm font-medium text-accent-600 hover:text-accent-500 dark:text-accent-400" (click)="loadOrganizations(1, itemsPerPage())">Retry</button>
+        </div>
+    } @else if (organizations().length === 0) {
+        <div class="tf-glass rounded-2xl p-14 text-center dark:bg-zinc-900/40">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-500/15 ring-1 ring-accent-500/25">
+                <i class="fas fa-building text-xl text-accent-600 dark:text-accent-400"></i>
+            </div>
+            <h3 class="mt-6 text-lg font-semibold text-syn-ink dark:text-white">No organizations yet</h3>
+            <p class="mt-2 text-sm text-syn-muted">Create one to invite your team.</p>
+            <a routerLink="/organizations/new" class="tf-btn-primary mt-6 inline-flex">
+                <i class="fas fa-plus text-xs"></i>
+                Create organization
+            </a>
+        </div>
+    } @else {
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            @for (org of organizations(); track org._id) {
+                <article class="tf-glass flex flex-col overflow-hidden rounded-2xl transition hover:ring-1 hover:ring-accent-500/25 dark:bg-zinc-900/35 dark:hover:ring-white/10">
+                    <div class="flex flex-1 flex-col p-5">
+                        <div class="flex items-start justify-between gap-3">
+                            @if (org.logo) {
+                                <div class="h-12 w-12 overflow-hidden rounded-xl bg-slate-100 ring-1 ring-syn-border dark:bg-white/[0.06] dark:ring-white/10">
+                                    <img src="{{ org.logo }}" alt="" class="h-full w-full object-cover" />
+                                </div>
+                            } @else {
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 ring-1 ring-syn-border dark:bg-white/[0.06] dark:ring-white/10">
+                                    <i class="fas fa-building text-accent-600 dark:text-accent-400"></i>
+                                </div>
+                            }
+                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-syn-muted dark:bg-white/[0.06] dark:text-zinc-400">{{ org.members.length }} members</span>
+                        </div>
+                        <h3 class="mt-4 text-lg font-semibold text-syn-ink dark:text-white">{{ org.name }}</h3>
+                        <p class="mt-2 line-clamp-2 flex-1 text-sm text-syn-muted">{{ org.description || 'No description' }}</p>
+                        <p class="mt-4 text-[11px] text-slate-500 dark:text-zinc-600">Owner · {{ org.owner.email }}</p>
+                    </div>
+                    <div class="border-t border-syn-border p-4 dark:border-white/[0.06]">
+                        <a [routerLink]="['/organizations', org._id]" class="tf-btn-primary flex w-full justify-center">
+                            Open
+                        </a>
+                    </div>
+                </article>
+            }
+        </div>
+
+        @if (totalPages() > 1) {
+            <div class="flex justify-center">
+                <div class="tf-glass flex items-center gap-6 rounded-xl px-4 py-3 text-sm text-syn-muted dark:bg-zinc-900/50">
+                    <button type="button" (click)="previousPage()" [disabled]="currentPage() === 1" class="disabled:opacity-30 hover:text-syn-ink dark:hover:text-white">Previous</button>
+                    <span class="text-xs">{{ (currentPage() - 1) * itemsPerPage() + 1 }}–{{ Math.min(currentPage() * itemsPerPage(), totalOrganizations()) }} / {{ totalOrganizations() }}</span>
+                    <button type="button" (click)="nextPage()" [disabled]="currentPage() === totalPages()" class="disabled:opacity-30 hover:text-syn-ink dark:hover:text-white">Next</button>
+                </div>
+            </div>
+        }
+    }
+</div>

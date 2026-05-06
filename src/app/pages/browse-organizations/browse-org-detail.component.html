@@ -1,0 +1,58 @@
+<div class="animate-fade-in mx-auto max-w-4xl pb-16 pt-4">
+  <div class="mb-6 flex items-center gap-3">
+    <a routerLink="/browse/orgs" class="text-sm font-medium text-accent-600 hover:underline dark:text-accent-400">
+      ← Back to marketplace
+    </a>
+  </div>
+
+  @if (loading()) {
+    <p class="text-sm text-syn-muted">Loading…</p>
+  } @else if (error()) {
+    <p class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-500/40 dark:bg-red-950/40 dark:text-red-200">
+      {{ error() }}
+    </p>
+  } @else if (detail()) {
+    @let d = detail()!;
+    <div class="tf-glass rounded-2xl p-8 dark:bg-zinc-900/40">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-semibold text-syn-ink dark:text-white">{{ d.name }}</h1>
+          @if (d.description) {
+            <p class="mt-2 text-sm text-syn-muted">{{ d.description }}</p>
+          }
+        </div>
+        <span
+          class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ring-1"
+          [ngClass]="
+            d.visibility === 'public'
+              ? 'bg-emerald-500/15 text-emerald-800 ring-emerald-500/30 dark:text-emerald-300'
+              : 'bg-slate-500/15 text-slate-700 ring-slate-400/40 dark:text-zinc-300'
+          "
+        >
+          {{ d.visibility }}
+        </span>
+      </div>
+
+      <p class="mt-6 text-sm text-syn-muted">
+        <span class="font-medium text-syn-ink dark:text-white">{{ d.memberCount }}</span>
+        members
+      </p>
+
+      @if (d.viewerMembership) {
+        <p class="mt-4 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-900 dark:text-emerald-200">
+          You are a member of this organization.
+        </p>
+      } @else if (!auth.isGuest()) {
+        <button type="button" class="tf-btn-primary mt-6" [disabled]="requesting()" (click)="requestJoin()">
+          @if (requesting()) {
+            Sending…
+          } @else {
+            Request to join
+          }
+        </button>
+      } @else {
+        <p class="mt-6 text-sm text-syn-muted">Guests can browse public organizations but cannot send join requests.</p>
+      }
+    </div>
+  }
+</div>

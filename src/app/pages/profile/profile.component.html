@@ -1,0 +1,68 @@
+<div class="mx-auto max-w-xl animate-fade-in pb-10">
+  <div class="overflow-hidden rounded-2xl tf-glass dark:bg-zinc-900/50">
+    <div class="border-b border-syn-border bg-gradient-to-r from-violet-50 via-white to-indigo-50 px-6 py-8 dark:border-white/[0.06] dark:from-accent-900/30 dark:via-zinc-900/50 dark:to-indigo-900/25">
+      <div class="flex items-center gap-4">
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-syn-border dark:bg-white/[0.08] dark:ring-white/15">
+          <i class="fas fa-user text-2xl text-accent-600 dark:text-accent-300"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-xl font-semibold text-syn-ink dark:text-white">Profile</h1>
+          @if (profile()?.displayName) {
+            <p class="truncate text-sm font-medium text-syn-ink dark:text-white">{{ profile()?.displayName }}</p>
+          }
+          @if (profile()?.fullName && profile()?.displayName !== profile()?.fullName) {
+            <p class="truncate text-xs text-syn-muted">{{ profile()?.fullName }}</p>
+          }
+          <p class="truncate text-sm text-syn-muted">{{ profile()?.email }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6">
+      @if (loading()) {
+        <div class="flex justify-center py-12">
+          <app-spinner size="sm" variant="accent" />
+        </div>
+      } @else if (error()) {
+        <p class="text-center text-sm text-red-600 dark:text-red-400">{{ error() }}</p>
+      } @else if (profile()) {
+        <dl class="grid gap-5 sm:grid-cols-2">
+          @if (profile().fullName) {
+            <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[11px] font-semibold uppercase tracking-wider text-syn-muted">Full name</dt>
+              <dd class="mt-1 text-sm font-medium text-syn-ink dark:text-white">{{ profile().fullName }}</dd>
+            </div>
+          }
+          @if (profile().displayName) {
+            <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[11px] font-semibold uppercase tracking-wider text-syn-muted">Display name</dt>
+              <dd class="mt-1 text-sm font-medium text-syn-ink dark:text-white">{{ profile().displayName }}</dd>
+            </div>
+          }
+          <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+            <dt class="text-[11px] font-semibold uppercase tracking-wider text-syn-muted">Role</dt>
+            <dd class="mt-1 text-sm font-medium capitalize text-syn-ink dark:text-white">{{ profile().role }}</dd>
+          </div>
+          @if (profile().organization) {
+            <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[11px] font-semibold uppercase tracking-wider text-syn-muted">Organization</dt>
+              <dd class="mt-1 text-sm font-medium text-syn-ink dark:text-white">{{ profile().organization.name }}</dd>
+            </div>
+          }
+          @if (profile().organizationRole) {
+            <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[11px] font-semibold uppercase tracking-wider text-syn-muted">Org role</dt>
+              <dd class="mt-1 text-sm font-medium text-syn-ink dark:text-white">{{ profile().organizationRole }}</dd>
+            </div>
+          }
+          @if (profile().joinedAt) {
+            <div class="rounded-xl border border-syn-border bg-slate-50/80 px-4 py-3 dark:border-white/[0.06] dark:bg-white/[0.03]">
+              <dt class="text-[11px] font-semibold uppercase tracking-wider text-syn-muted">Joined</dt>
+              <dd class="mt-1 text-sm font-medium text-syn-ink dark:text-white">{{ profile().joinedAt | date:'mediumDate' }}</dd>
+            </div>
+          }
+        </dl>
+      }
+    </div>
+  </div>
+</div>

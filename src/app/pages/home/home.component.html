@@ -1,0 +1,86 @@
+<div class="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-surface-950 dark:text-zinc-100 dark:bg-mesh-gradient">
+    <header class="sticky top-0 z-20 border-b border-zinc-200/80 bg-white/75 backdrop-blur-xl dark:border-white/[0.06] dark:bg-zinc-950/75">
+        <div class="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+            <div class="flex items-center gap-2">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent-600 to-indigo-600">
+                    <span class="text-[10px] font-bold text-white">Sy</span>
+                </div>
+                <span class="font-semibold tracking-tight">Syncora</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" (click)="theme.toggleTheme()" class="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-100 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/5" [attr.aria-label]="theme.isDarkMode() ? 'Light mode' : 'Dark mode'">
+                    <i class="fas text-sm" [ngClass]="theme.isDarkMode() ? 'fa-sun' : 'fa-moon'"></i>
+                </button>
+                <a routerLink="/login" class="rounded-lg px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/5">Sign in</a>
+                <a routerLink="/register" class="rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200">Get started</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
+        <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-accent-600 dark:text-accent-400">Operations OS</p>
+                <h1 class="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
+                    Ship tasks with <span class="bg-gradient-to-r from-accent-500 to-indigo-400 bg-clip-text text-transparent">Stripe-grade</span> clarity.
+                </h1>
+                <p class="mt-6 max-w-lg text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
+                    Syncora blends the discipline of Jira with the calm of Notion — purpose-built for teams that outgrow spreadsheets.
+                </p>
+                <div class="mt-10 flex flex-wrap gap-3">
+                    <a routerLink="/register" class="tf-btn-primary bg-zinc-900 dark:bg-white dark:text-zinc-900">Start free</a>
+                    <a routerLink="/login" class="tf-btn-ghost border-zinc-300 dark:border-white/15">View demo login</a>
+                </div>
+                <dl class="mt-14 grid grid-cols-2 gap-6 text-sm sm:grid-cols-3">
+                    <div class="rounded-xl border border-zinc-200/80 bg-white/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                        <dt class="text-zinc-500">Assignable</dt>
+                        <dd class="mt-1 font-semibold text-zinc-900 dark:text-white">Owners & roles</dd>
+                    </div>
+                    <div class="rounded-xl border border-zinc-200/80 bg-white/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                        <dt class="text-zinc-500">Transparent</dt>
+                        <dd class="mt-1 font-semibold text-zinc-900 dark:text-white">Audit timeline</dd>
+                    </div>
+                    <div class="rounded-xl border border-zinc-200/80 bg-white/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                        <dt class="text-zinc-500">Focused</dt>
+                        <dd class="mt-1 font-semibold text-zinc-900 dark:text-white">Priority ladder</dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="relative">
+                <div class="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-accent-600/20 via-transparent to-indigo-600/20 blur-2xl"></div>
+                <div class="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/70 shadow-glass dark:border-white/10 dark:bg-zinc-900/60">
+                    <img src="image.png" alt="" class="w-full object-cover opacity-90 dark:opacity-80" />
+                    <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-zinc-950/90 to-transparent p-6">
+                        <p class="text-sm font-medium text-white">Unified workspace</p>
+                        <p class="text-xs text-zinc-400">Dashboard · Tasks · Organizations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="mt-24 border-t border-zinc-200/80 pt-16 dark:border-white/[0.06]">
+            <h2 class="text-center text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">How teams use Syncora</h2>
+            <div class="mt-10 grid gap-6 md:grid-cols-3">
+                <article class="rounded-2xl border border-zinc-200/80 bg-white/70 p-6 dark:border-white/10 dark:bg-white/[0.03]">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-500/15 text-accent-600 dark:text-accent-400"><i class="fas fa-bolt"></i></div>
+                    <h3 class="mt-4 font-semibold text-zinc-900 dark:text-white">Capture</h3>
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Rich tasks with deadlines, assignees, and checklists.</p>
+                </article>
+                <article class="rounded-2xl border border-zinc-200/80 bg-white/70 p-6 dark:border-white/10 dark:bg-white/[0.03]">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400"><i class="fas fa-chart-simple"></i></div>
+                    <h3 class="mt-4 font-semibold text-zinc-900 dark:text-white">Measure</h3>
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Completion velocity and priority mix at a glance.</p>
+                </article>
+                <article class="rounded-2xl border border-zinc-200/80 bg-white/70 p-6 dark:border-white/10 dark:bg-white/[0.03]">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"><i class="fas fa-shield-halved"></i></div>
+                    <h3 class="mt-4 font-semibold text-zinc-900 dark:text-white">Govern</h3>
+                    <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Organizations, roles, and SSO-ready auth flows.</p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-zinc-200/80 py-8 text-center text-xs text-zinc-500 dark:border-white/[0.06]">
+        Syncora · Built for team collaboration and task tracking
+    </footer>
+</div>

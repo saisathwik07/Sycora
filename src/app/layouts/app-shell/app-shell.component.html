@@ -1,0 +1,240 @@
+<div class="flex min-h-screen bg-syn-app text-syn-ink">
+  <!-- Desktop sidebar -->
+  <aside
+    class="hidden lg:flex flex-col shrink-0 border-r border-syn-border bg-syn-sidebar transition-[width] duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]"
+    [ngClass]="sidebarCollapsed() ? 'w-[72px]' : 'w-[260px]'"
+  >
+    <div class="flex h-14 items-center gap-2 border-b border-syn-border px-3">
+      <div
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-accent-600 to-indigo-600 shadow-[0_0_24px_-4px_rgba(139,92,246,0.45)]"
+      >
+        <span class="text-[10px] font-bold tracking-tight text-white">Sy</span>
+      </div>
+      @if (!sidebarCollapsed()) {
+        <span class="truncate text-sm font-semibold tracking-tight text-syn-ink dark:text-white">Syncora</span>
+      }
+      <button
+        type="button"
+        (click)="toggleSidebar()"
+        class="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/10 dark:hover:text-white"
+        [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      >
+        <i class="fas text-xs" [ngClass]="sidebarCollapsed() ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+      </button>
+    </div>
+
+    <nav class="flex-1 space-y-0.5 overflow-y-auto px-2 py-4">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="bg-syn-hover font-medium text-syn-ink shadow-sm ring-1 ring-violet-200/80 dark:bg-white/[0.08] dark:text-white dark:ring-white/10"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="closeMobile()"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+        [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+        [title]="sidebarCollapsed() ? 'Dashboard' : ''"
+      >
+        <i class="fas fa-gauge-high w-5 shrink-0 text-center text-accent-600 dark:text-accent-400"></i>
+        @if (!sidebarCollapsed()) {
+          <span>Dashboard</span>
+        }
+      </a>
+      <a
+        routerLink="/tasks"
+        routerLinkActive="bg-syn-hover font-medium text-syn-ink shadow-sm ring-1 ring-violet-200/80 dark:bg-white/[0.08] dark:text-white dark:ring-white/10"
+        (click)="closeMobile()"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+        [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+        [title]="sidebarCollapsed() ? 'Tasks' : ''"
+      >
+        <i class="fas fa-list-check w-5 shrink-0 text-center text-syn-muted"></i>
+        @if (!sidebarCollapsed()) {
+          <span>Tasks</span>
+        }
+      </a>
+      <a
+        routerLink="/organizations"
+        routerLinkActive="bg-syn-hover font-medium text-syn-ink shadow-sm ring-1 ring-violet-200/80 dark:bg-white/[0.08] dark:text-white dark:ring-white/10"
+        (click)="closeMobile()"
+        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+        [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+        [title]="sidebarCollapsed() ? 'Organizations' : ''"
+      >
+        <i class="fas fa-building w-5 shrink-0 text-center text-syn-muted"></i>
+        @if (!sidebarCollapsed()) {
+          <span>Organizations</span>
+        }
+      </a>
+      @if (showTeamNav()) {
+        <a
+          routerLink="/users"
+          routerLinkActive="bg-syn-hover font-medium text-syn-ink shadow-sm ring-1 ring-violet-200/80 dark:bg-white/[0.08] dark:text-white dark:ring-white/10"
+          (click)="closeMobile()"
+          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+          [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+          [title]="sidebarCollapsed() ? 'Team' : ''"
+        >
+          <i class="fas fa-users w-5 shrink-0 text-center text-syn-muted"></i>
+          @if (!sidebarCollapsed()) {
+            <span class="min-w-0 flex-1 truncate">Team</span>
+            @if (teamCount() > 0) {
+              <span class="flex shrink-0 items-center gap-1">
+                @for (m of teamPreview(); track m._id) {
+                  <span
+                    class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/25 to-indigo-500/25 text-[10px] font-semibold text-violet-800 ring-1 ring-violet-200/80 dark:from-accent-600/35 dark:to-indigo-600/30 dark:text-accent-100 dark:ring-white/15"
+                    [title]="m.displayName || m.email"
+                  >{{ initials(m) }}</span>
+                }
+                <span class="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-syn-muted ring-1 ring-syn-border dark:bg-white/10 dark:text-zinc-400">{{ teamCount() }}</span>
+              </span>
+            }
+          }
+        </a>
+      }
+      @if (isAdmin() || isSuperAdmin()) {
+        <a
+          routerLink="/tasks/new"
+          routerLinkActive="bg-syn-hover font-medium text-syn-ink shadow-sm ring-1 ring-violet-200/80 dark:bg-white/[0.08] dark:text-white dark:ring-white/10"
+          (click)="closeMobile()"
+          class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+          [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+          [title]="sidebarCollapsed() ? 'New task' : ''"
+        >
+          <i class="fas fa-plus w-5 shrink-0 text-center text-accent-600 dark:text-accent-400"></i>
+          @if (!sidebarCollapsed()) {
+            <span>New task</span>
+          }
+        </a>
+      }
+      <a
+        routerLink="/profile"
+        routerLinkActive="bg-syn-hover font-medium text-syn-ink shadow-sm ring-1 ring-violet-200/80 dark:bg-white/[0.08] dark:text-white dark:ring-white/10"
+        (click)="closeMobile()"
+        class="mt-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white"
+        [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+        [title]="sidebarCollapsed() ? 'Profile' : ''"
+      >
+        <i class="fas fa-user w-5 shrink-0 text-center text-syn-muted"></i>
+        @if (!sidebarCollapsed()) {
+          <span>Profile</span>
+        }
+      </a>
+    </nav>
+
+    <div class="space-y-1 border-t border-syn-border p-2">
+      @if (!sidebarCollapsed() && userEmail()) {
+        <p class="truncate px-3 py-1 text-[11px] text-syn-muted" [title]="userEmail()">{{ userEmail() }}</p>
+      }
+      <button
+        type="button"
+        (click)="logout()"
+        class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-red-500/10 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-500/15 dark:hover:text-red-300"
+        [ngClass]="sidebarCollapsed() ? 'justify-center' : ''"
+        [title]="sidebarCollapsed() ? 'Log out' : ''"
+      >
+        <i class="fas fa-arrow-right-from-bracket w-5 text-center shrink-0"></i>
+        @if (!sidebarCollapsed()) {
+          <span>Log out</span>
+        }
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile drawer -->
+  @if (mobileOpen()) {
+    <div class="fixed inset-0 z-40 lg:hidden" aria-modal="true">
+      <button
+        type="button"
+        class="absolute inset-0 bg-black/40 backdrop-blur-sm dark:bg-black/60"
+        (click)="closeMobile()"
+        aria-label="Close menu"
+      ></button>
+      <div
+        class="absolute bottom-0 left-0 top-0 flex w-[min(280px,85vw)] flex-col border-r border-syn-border bg-syn-sidebar shadow-2xl animate-fade-in dark:border-white/10"
+      >
+        <div class="flex h-14 items-center justify-between border-b border-syn-border px-4">
+          <span class="font-semibold text-syn-ink dark:text-white">Syncora</span>
+          <button type="button" class="p-2 text-syn-muted hover:text-syn-ink dark:hover:text-white" (click)="closeMobile()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="bg-violet-100 text-violet-900 dark:bg-white/10 dark:text-white"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMobile()"
+            class="block rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            Dashboard
+          </a>
+          <a routerLink="/tasks" routerLinkActive="bg-violet-100 text-violet-900 dark:bg-white/10 dark:text-white" (click)="closeMobile()" class="block rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/5 dark:hover:text-white">Tasks</a>
+          <a routerLink="/organizations" routerLinkActive="bg-violet-100 text-violet-900 dark:bg-white/10 dark:text-white" (click)="closeMobile()" class="block rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/5 dark:hover:text-white">Organizations</a>
+          @if (showTeamNav()) {
+            <a routerLink="/users" routerLinkActive="bg-violet-100 text-violet-900 dark:bg-white/10 dark:text-white" (click)="closeMobile()" class="block rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/5 dark:hover:text-white">Team</a>
+          }
+          @if (isAdmin() || isSuperAdmin()) {
+            <a routerLink="/tasks/new" routerLinkActive="bg-violet-100 text-violet-900 dark:bg-white/10 dark:text-white" (click)="closeMobile()" class="block rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/5 dark:hover:text-white">New task</a>
+          }
+          <a routerLink="/profile" routerLinkActive="bg-violet-100 text-violet-900 dark:bg-white/10 dark:text-white" (click)="closeMobile()" class="block rounded-lg px-3 py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/5 dark:hover:text-white">Profile</a>
+        </nav>
+        <button type="button" (click)="logout()" class="m-3 rounded-lg border border-syn-border py-2.5 text-sm text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:border-white/10 dark:hover:bg-white/5 dark:hover:text-white">Log out</button>
+      </div>
+    </div>
+  }
+
+  <div class="flex min-h-screen min-w-0 flex-1 flex-col">
+    <header
+      class="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 border-b border-syn-border bg-syn-header px-4 backdrop-blur-xl lg:px-6"
+    >
+      <button
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded-lg text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink lg:hidden dark:hover:bg-white/10 dark:hover:text-white"
+        (click)="toggleMobile()"
+        aria-label="Open menu"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="min-w-0 flex-1 space-y-1">
+        <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-syn-muted">Workspace</p>
+        @if (showWorkspaceSwitcher()) {
+          <select
+            class="tf-input max-w-[220px] py-1.5 text-xs lg:max-w-xs"
+            [value]="activeOrganizationId()"
+            (change)="switchOrganization($event)"
+            aria-label="Switch workspace"
+          >
+            @for (org of workspaceChoices(); track org._id) {
+              <option [value]="org._id">{{ org.name }}</option>
+            }
+          </select>
+        } @else if (auth.isGuest()) {
+          <p class="truncate text-sm font-medium text-amber-800 dark:text-amber-200">Guest · demo mode</p>
+        } @else if (users.profile()?.organization?.name) {
+          <p class="truncate text-sm font-medium text-syn-ink dark:text-white">
+            {{ users.profile()?.organization?.name }}
+          </p>
+        } @else {
+          <p class="truncate text-sm text-syn-muted">No workspace selected</p>
+        }
+      </div>
+      <button
+        type="button"
+        (click)="theme.toggleTheme()"
+        class="flex h-9 w-9 items-center justify-center rounded-lg border border-syn-border text-syn-muted transition-colors hover:bg-syn-hover hover:text-syn-ink dark:hover:bg-white/10 dark:hover:text-white"
+        [attr.aria-label]="theme.isDarkMode() ? 'Light mode' : 'Dark mode'"
+      >
+        <i class="fas" [ngClass]="theme.isDarkMode() ? 'fa-sun' : 'fa-moon'"></i>
+      </button>
+    </header>
+
+    <main class="flex-1 overflow-auto bg-syn-app text-syn-ink">
+      <div class="mx-auto min-h-[calc(100vh-3.5rem)] max-w-[1600px] px-4 py-6 lg:px-8 lg:py-8">
+        <router-outlet />
+      </div>
+    </main>
+
+    <footer class="shrink-0 border-t border-syn-border bg-syn-footer px-4 py-3 text-center text-[11px] text-syn-muted lg:px-8">
+      Syncora · Built for team collaboration
+    </footer>
+  </div>
+</div>

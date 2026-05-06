@@ -1,0 +1,84 @@
+<div
+  class="animate-fade-in mx-auto flex max-w-lg flex-col gap-8 pb-16 pt-4"
+>
+  <div>
+    <h1 class="text-2xl font-semibold tracking-tight text-syn-ink dark:text-white">
+      Welcome to Syncora
+    </h1>
+    <p class="mt-2 text-sm text-syn-muted">
+      Tell us about you. You can create a workspace now or pick one on the next step (marketplace, new org, or guest).
+    </p>
+  </div>
+
+  <div class="tf-glass rounded-2xl p-8 dark:bg-zinc-900/40">
+    <form [formGroup]="form" class="space-y-5">
+      <div>
+        <label for="fullName" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-syn-muted"
+          >Full name</label
+        >
+        <input id="fullName" type="text" formControlName="fullName" class="tf-input" autocomplete="name" />
+        @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+          <p class="mt-1 text-xs text-red-600 dark:text-red-400">Enter your full name</p>
+        }
+      </div>
+
+      <div>
+        <label for="displayName" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-syn-muted"
+          >Display name</label
+        >
+        <input
+          id="displayName"
+          type="text"
+          formControlName="displayName"
+          class="tf-input"
+          autocomplete="nickname"
+        />
+        @if (form.get('displayName')?.invalid && form.get('displayName')?.touched) {
+          <p class="mt-1 text-xs text-red-600 dark:text-red-400">How should we refer to you?</p>
+        }
+      </div>
+
+      <div>
+        <label for="workspaceName" class="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-syn-muted"
+          >Workspace name <span class="font-normal normal-case text-syn-muted">(optional here)</span></label
+        >
+        <input
+          id="workspaceName"
+          type="text"
+          formControlName="workspaceName"
+          class="tf-input"
+          placeholder="e.g. Acme Labs — or skip below"
+        />
+      </div>
+
+      @if (error()) {
+        <p class="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-200">
+          {{ error() }}
+        </p>
+      }
+
+      <div class="flex flex-col gap-3">
+        <button
+          type="button"
+          class="tf-btn-primary w-full justify-center"
+          [disabled]="submitting()"
+          (click)="submit()"
+        >
+          @if (submitting()) {
+            <span>Saving…</span>
+          } @else {
+            <span>Create workspace & continue</span>
+          }
+        </button>
+        <button
+          type="button"
+          class="tf-btn-secondary w-full justify-center border border-syn-border dark:border-white/15"
+          [disabled]="submitting()"
+          (click)="submitSkipWorkspace()"
+        >
+          Choose workspace later
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
