@@ -219,8 +219,8 @@ This project looks like something a startup could actually monetize.
 **Sai Sathwik**
 
 GitHub: https://github.com/SaiSathwikReddyN  
-LinkedIn: Add your LinkedIn link  
-Portfolio: Add your portfolio link  
+LinkedIn: https://www.linkedin.com/in/saisathwikreddyn/  
+Portfolio: https://saisathwikportfolio.vercel.app/ 
 
 ---
 
