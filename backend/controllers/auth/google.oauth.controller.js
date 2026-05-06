@@ -87,23 +87,19 @@ exports.googleRedirect = (req, res) => {
     }
 
     const state = crypto.randomBytes(24).toString('hex');
-    const useSecureCookies =
-      process.env.COOKIE_SECURE === 'true' ||
-      process.env.NODE_ENV === 'production' ||
-      process.env.RAILWAY_ENVIRONMENT === 'production';
 
     console.log('[googleOAuth] googleRedirect:pre_cookie', {
       rid,
       redirectUri,
       clientId: maskId(clientId),
-      useSecureCookies,
+      secure: false,
     });
 
     res.cookie('google_oauth_state', state, {
       httpOnly: true,
       maxAge: 10 * 60 * 1000,
       sameSite: 'lax',
-      secure: process.env.COOKIE_SECURE === 'false' ? false : useSecureCookies,
+      secure: false,
       path: '/',
     });
 
