@@ -25,12 +25,11 @@ export class LoginComponent implements OnInit {
   isLoading = computed(() => this.loading());
 
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private notificationService = inject(NotificationService);
 
-  constructor() {
+  constructor(private route: ActivatedRoute) {
     this.loginForm = this.fb.group({
       email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [
@@ -42,12 +41,14 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.route.snapshot.queryParamMap.get('error') === 'access_denied') {
-      this.error.set(
-        'Access denied. Your account is not authorized. Contact the admin to request access.',
-      );
-      return;
-    }
+    this.route.queryParams.subscribe((params) => {
+      if (params['error'] === 'access_denied') {
+        this.error.set(
+          'Access denied. Your email is not authorized. Contact the admin.',
+        );
+      }
+    });
+
     const err = this.route.snapshot.queryParamMap.get('oauth_error');
     if (err) {
       this.error.set(this.oauthErrorMessage(err));

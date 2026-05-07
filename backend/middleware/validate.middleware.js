@@ -2,7 +2,7 @@ const { errorResponse } = require('../utils/response');
 
 const isEmailAllowed = (email) => {
   const raw = process.env.ALLOWED_EMAILS || '';
-  if (!raw.trim()) return true; // open if not set
+  if (!raw.trim()) return true;
   const allowed = raw.split(',').map((e) => e.trim().toLowerCase());
   return allowed.includes(email.trim().toLowerCase());
 };
@@ -18,11 +18,10 @@ const validateRegister = (req, res, next) => {
   } else if (!EMAIL_REGEX.test(email.trim())) {
     errors.push('Invalid email format');
   } else if (!isEmailAllowed(email)) {
-    return errorResponse(
-      res,
-      403,
-      'Access restricted. Contact the admin to request access.',
-    );
+    return res.status(403).json({
+      message: 'Access restricted. Contact the admin to get access.',
+      success: false,
+    });
   }
 
   if (!password || typeof password !== 'string') {
@@ -45,6 +44,13 @@ const validateLogin = (req, res, next) => {
 
   if (!email || typeof email !== 'string') {
     errors.push('Email is required');
+  } else if (!EMAIL_REGEX.test(email.trim())) {
+    errors.push('Invalid email format');
+  } else if (!isEmailAllowed(email)) {
+    return res.status(403).json({
+      message: 'Access restricted. Contact the admin to get access.',
+      success: false,
+    });
   }
 
   if (!password || typeof password !== 'string') {
