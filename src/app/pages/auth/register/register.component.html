@@ -64,6 +64,10 @@
             <div class="mt-1.5 text-xs text-red-400">
               @if (registerForm.get('password')?.errors?.['required']) { <p>Required</p> }
               @if (registerForm.get('password')?.errors?.['minlength']) { <p>Min 6 characters</p> }
+              @if (registerForm.get('password')?.errors?.['maxlength']) { <p>Max 20 characters</p> }
+              @if (registerForm.get('password')?.errors?.['passwordRules']) {
+                <p>Use 6–20 characters with uppercase, lowercase, a number, and a special character.</p>
+              }
             </div>
           }
         </div>
@@ -72,6 +76,10 @@
           <p class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Password rules</p>
           <ul class="mt-2 space-y-1 text-xs text-zinc-600 dark:text-zinc-400">
             <li class="flex gap-2"><i class="fas fa-check mt-0.5 text-emerald-500"></i> 6–20 characters</li>
+            <li class="flex gap-2"><i class="fas fa-check mt-0.5 text-emerald-500"></i> At least one uppercase letter</li>
+            <li class="flex gap-2"><i class="fas fa-check mt-0.5 text-emerald-500"></i> At least one lowercase letter</li>
+            <li class="flex gap-2"><i class="fas fa-check mt-0.5 text-emerald-500"></i> At least one number</li>
+            <li class="flex gap-2"><i class="fas fa-check mt-0.5 text-emerald-500"></i> At least one special character</li>
           </ul>
         </div>
 

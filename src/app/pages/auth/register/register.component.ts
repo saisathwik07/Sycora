@@ -1,17 +1,36 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import {
+  AbstractControl,
   FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { OrganizationService } from '../../../services/organization.service';
 import { Organization } from '../../../core/models/organization.model';
 import { environment } from '../../../../environments/environment';
+
+/** Matches backend registration rules: 6–20 chars, upper, lower, number, special */
+const REGISTER_PASSWORD_PATTERN =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,20}$/;
+
+function registerPasswordStrengthValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
+  const v = control.value;
+  if (v == null || v === '') {
+    return null;
+  }
+  return REGISTER_PASSWORD_PATTERN.test(String(v))
+    ? null
+    : { passwordRules: true };
+}
 
 @Component({
     selector: 'app-register',
@@ -37,6 +56,7 @@ export class RegisterComponent implements OnInit {
         Validators.required,
         Validators.minLength(6),
         Validators.maxLength(20),
+        registerPasswordStrengthValidator,
       ]),
       organization: new FormControl(''),
       role: new FormControl('user', Validators.required)
@@ -86,14 +106,28 @@ export class RegisterComponent implements OnInit {
       role: this.registerForm.value.role
     };
 
+    this.error.set('');
     this.authService.register(data).subscribe({
       next: () => {
         void this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error(err);
-        this.error.set(err?.error?.message || 'An error occurred');
+        this.error.set(this.extractRegisterErrorMessage(err));
       },
     });
+  }
+
+  private extractRegisterErrorMessage(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const body = err.error;
+      if (body && typeof body === 'object' && 'message' in body) {
+        const msg = (body as { message: unknown }).message;
+        if (typeof msg === 'string' && msg.trim()) {
+          return msg;
+        }
+      }
+    }
+    return 'An error occurred';
   }
 }

@@ -3,6 +3,10 @@ const crypto = require("crypto");
 const User = require("../../models/user/user.model");
 const Organization = require("../../models/organization/organization.model");
 const { generateToken, successResponse, errorResponse } = require("../../utils/response");
+const {
+  isEmailAllowed,
+  getRegisterPasswordError,
+} = require("../../middleware/validate.middleware");
 const { sendPasswordResetEmail } = require("../../utils/email");
 const { ensurePersonalWorkspace } = require("../../utils/userOrganization");
 const { addUserToOrganization } = require("../../utils/membership");
@@ -60,8 +64,16 @@ exports.register = async (req, res) => {
       return errorResponse(res, 400, "Email and password are required");
     }
 
-    if (password.length < 8) {
-      return errorResponse(res, 400, "Password must be at least 8 characters");
+    if (!isEmailAllowed(email)) {
+      return res.status(403).json({
+        message:
+          "This email is not authorized to create an account. Contact admin.",
+      });
+    }
+
+    const pwdErr = getRegisterPasswordError(password);
+    if (pwdErr) {
+      return errorResponse(res, 400, pwdErr);
     }
 
     const existingUser = await User.findOne({ email });
