@@ -1,6 +1,6 @@
 import { resolveApiUrl } from './environment.common';
 
-const remoteApi = 'https://task-management-app-8t3d.vercel.app/api';
+const remoteApi = 'https://stunning-miracle-production.up.railway.app/api';
 
 export const environment = {
   production: false,

@@ -192,6 +192,16 @@ exports.googleCallback = async (req, res) => {
     }
 
     const email = String(profile.email).toLowerCase().trim();
+
+    const allowedRaw = process.env.ALLOWED_EMAILS || '';
+    if (allowedRaw.trim()) {
+      const allowed = allowedRaw.split(',').map((e) => e.trim().toLowerCase());
+      if (!allowed.includes(email)) {
+        const fe = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+        return res.redirect(`${fe}/login?error=access_denied`);
+      }
+    }
+
     const googleId = String(profile.id);
 
     let user = await User.findOne({ googleId }).select('+googleId');

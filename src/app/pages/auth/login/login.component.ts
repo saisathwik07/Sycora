@@ -42,6 +42,12 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.get('error') === 'access_denied') {
+      this.error.set(
+        'Access denied. Your account is not authorized. Contact the admin to request access.',
+      );
+      return;
+    }
     const err = this.route.snapshot.queryParamMap.get('oauth_error');
     if (err) {
       this.error.set(this.oauthErrorMessage(err));

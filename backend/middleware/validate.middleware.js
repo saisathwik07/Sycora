@@ -1,5 +1,12 @@
 const { errorResponse } = require('../utils/response');
 
+const isEmailAllowed = (email) => {
+  const raw = process.env.ALLOWED_EMAILS || '';
+  if (!raw.trim()) return true; // open if not set
+  const allowed = raw.split(',').map((e) => e.trim().toLowerCase());
+  return allowed.includes(email.trim().toLowerCase());
+};
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const validateRegister = (req, res, next) => {
@@ -10,6 +17,12 @@ const validateRegister = (req, res, next) => {
     errors.push('Email is required');
   } else if (!EMAIL_REGEX.test(email.trim())) {
     errors.push('Invalid email format');
+  } else if (!isEmailAllowed(email)) {
+    return errorResponse(
+      res,
+      403,
+      'Access restricted. Contact the admin to request access.',
+    );
   }
 
   if (!password || typeof password !== 'string') {
